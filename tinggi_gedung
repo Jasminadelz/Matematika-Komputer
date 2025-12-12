@@ -1,379 +1,455 @@
 /*
 ===============================================================================
-                    PROGRAM ELIMINASI GAUSS
-                  Sistem Persamaan Linear
+              PROGRAM PENGUKURAN TINGGI GEDUNG
+                   Metode Trigonometri
 ===============================================================================
-Program ini dibuat untuk PEMULA yang baru belajar bahasa C
-Struktur program dibuat sesederhana mungkin agar mudah dipahami
+Program ini menggunakan konsep trigonometri untuk menghitung tinggi gedung
+berdasarkan tinggi pengamat, sudut elevasi, dan jarak pengamat ke gedung.
+
+Rumus: Tinggi Gedung = Tinggi Pengamat + (Jarak × tan(sudut elevasi))
 ===============================================================================
 */
 
 #include <stdio.h>
+#include <math.h>   /* Library untuk fungsi matematika seperti tan() */
+
+/* Konstanta untuk konversi derajat ke radian */
+#define PI 3.14159265358979323846
 
 /*
 ===============================================================================
-FUNGSI-FUNGSI PEMBANTU (Helper Functions)
+BAGIAN 1: FUNGSI-FUNGSI PEMBANTU
 ===============================================================================
 */
 
 /* Fungsi untuk membersihkan buffer input */
-/* Berguna agar program tidak skip saat menerima input */
 void bersihkanBuffer() {
     while(getchar() != '\n');
 }
 
-/* Fungsi untuk pause program (menunggu user tekan Enter) */
+/* Fungsi untuk pause program */
 void tekanEnter() {
     printf("\nTekan ENTER untuk melanjutkan...");
     getchar();
     printf("\n");
 }
 
-/*
-===============================================================================
-FUNGSI 1: INPUT MATRIKS
-===============================================================================
-Fungsi ini digunakan untuk menerima input dari user
-User akan memasukkan angka-angka untuk matriks augmented
-*/
-
-void inputMatriks(int n, float mat[10][11]) {
-    int baris, kolom;
-    
-    printf("\n");
-    printf("=======================================================\n");
-    printf("           INPUT MATRIKS AUGMENTED\n");
-    printf("=======================================================\n");
-    printf("Anda akan memasukkan %d baris\n", n);
-    printf("Setiap baris berisi %d angka (pisahkan dengan SPASI)\n", n+1);
-    printf("Setelah selesai 1 baris, tekan ENTER\n");
-    printf("=======================================================\n\n");
-    
-    /* Contoh untuk membantu user */
-    printf("Contoh input untuk sistem 3 persamaan:\n");
-    printf("  2x + 1y - 1z = 8  -->  ketik: 2 1 -1 8\n");
-    printf("-------------------------------------------------------\n\n");
-    
-    /* Proses input untuk setiap baris */
-    for(baris = 0; baris < n; baris++) {
-        printf("Baris ke-%d: ", baris + 1);
-        
-        /* Input setiap elemen dalam baris */
-        for(kolom = 0; kolom <= n; kolom++) {
-            scanf("%f", &mat[baris][kolom]);
-        }
-        bersihkanBuffer(); /* Bersihkan buffer setelah input */
-    }
-    
-    printf("\nSemua data berhasil diinput!\n");
-    tekanEnter();
+/* Fungsi untuk konversi derajat ke radian */
+/* Rumus: radian = derajat × (π / 180) */
+float derajatKeRadian(float derajat) {
+    return derajat * (PI / 180.0);
 }
 
 /*
 ===============================================================================
-FUNGSI 2: TAMPILKAN MATRIKS
+BAGIAN 2: FUNGSI TAMPILAN HEADER
 ===============================================================================
-Fungsi ini menampilkan matriks ke layar dengan format yang rapi
 */
 
-void tampilkanMatriks(int n, float mat[10][11], char judul[]) {
-    int baris, kolom;
-    
+void tampilkanHeader() {
+    printf("\n");
     printf("=======================================================\n");
-    printf("  %s\n", judul);
-    printf("=======================================================\n\n");
-    
-    /* Tampilkan setiap baris matriks */
-    for(baris = 0; baris < n; baris++) {
-        printf("[ ");
-        
-        /* Tampilkan koefisien (kolom A) */
-        for(kolom = 0; kolom < n; kolom++) {
-            printf("%7.2f ", mat[baris][kolom]);
-        }
-        
-        /* Garis pemisah sebelum konstanta */
-        printf("|");
-        
-        /* Tampilkan konstanta (kolom b) */
-        printf("%7.2f ", mat[baris][n]);
-        
-        printf("]\n");
-    }
-    
+    printf("=======================================================\n");
+    printf("                                                       \n");
+    printf("          PROGRAM PENGUKURAN TINGGI GEDUNG             \n");
+    printf("              Menggunakan Trigonometri                 \n");
+    printf("                                                       \n");
+    printf("=======================================================\n");
+    printf("=======================================================\n");
     printf("\n");
 }
 
 /*
 ===============================================================================
-FUNGSI 3: PROSES ELIMINASI GAUSS
+BAGIAN 3: FUNGSI TAMPILAN ILUSTRASI
 ===============================================================================
-Fungsi ini mengubah matriks menjadi bentuk segitiga atas
-Caranya: membuat angka di bawah diagonal utama menjadi 0
 */
 
-void prosesEliminasi(int n, float mat[10][11]) {
-    int pivotBaris, targetBaris, kolom;
-    float pengali;
-    
-    printf("=======================================================\n");
-    printf("        PROSES ELIMINASI GAUSS DIMULAI\n");
+void tampilkanIlustrasi() {
+    printf("========================================================\n");
+    printf("                  ILUSTRASI PENGUKURAN\n");
+    printf("========================================================\n\n");
+    printf("                    ^                                   \n");
+    printf("                    |                                   \n");
+    printf("                    |  TINGGI                           \n");
+    printf("                    |  GEDUNG                           \n");
+    printf("                    |  (?)                              \n");
+    printf("                    |                                   \n");
+    printf("                    |                                   \n");
+    printf("                  --+--  <-- Puncak Gedung              \n");
+    printf("                 /  |                                   \n");
+    printf("                /   |                                   \n");
+    printf("               / α  |                                   \n");
+    printf("         MATA/______|                                   \n");
+    printf("         PENGAMAT   |                                   \n");
+    printf("              |     |                                   \n");
+    printf("    Tinggi -->|     |                                   \n");
+    printf("    Pengamat  |     |                                   \n");
+    printf("         _____|_____|_____                              \n");
+    printf("              |<--->|                                   \n");
+    printf("               Jarak                                    \n");
+    printf("\n");
+    printf("Keterangan:                                            \n");
+    printf("  α (alpha) = Sudut Elevasi                            \n");
+    printf("  Jarak     = Jarak horizontal pengamat ke gedung      \n");
+    printf("\n");
     printf("=======================================================\n\n");
-    
-    /* Loop untuk setiap pivot (elemen diagonal) */
-    for(pivotBaris = 0; pivotBaris < n-1; pivotBaris++) {
-        
-        printf("--- LANGKAH %d ---\n", pivotBaris + 1);
-        printf("Membuat angka di bawah pivot baris %d menjadi 0\n\n", pivotBaris + 1);
-        
-        /* Loop untuk setiap baris di bawah pivot */
-        for(targetBaris = pivotBaris + 1; targetBaris < n; targetBaris++) {
-            
-            /* Hitung angka pengali */
-            pengali = mat[targetBaris][pivotBaris] / mat[pivotBaris][pivotBaris];
-            
-            printf("  Baris %d dikurangi (%.2f x Baris %d)\n", 
-                   targetBaris+1, pengali, pivotBaris+1);
-            
-            /* Lakukan operasi: Baris_target = Baris_target - (pengali x Baris_pivot) */
-            for(kolom = pivotBaris; kolom <= n; kolom++) {
-                mat[targetBaris][kolom] = mat[targetBaris][kolom] - (pengali * mat[pivotBaris][kolom]);
-            }
-        }
-        
-        printf("\n");
-    }
-    
-    printf("Eliminasi selesai! Matriks sudah berbentuk segitiga atas.\n");
-    tekanEnter();
 }
 
 /*
 ===============================================================================
-FUNGSI 4: SUBSTITUSI BALIK
+BAGIAN 4: FUNGSI INPUT DATA
 ===============================================================================
-Fungsi ini menghitung nilai x, y, z, ... dari matriks segitiga atas
-Caranya: mulai dari baris paling bawah, hitung ke atas
 */
 
-void hitungSolusi(int n, float mat[10][11], float hasil[10]) {
-    int baris, kolom;
-    float jumlah;
-    
+void inputDataPengukuran(float *tinggiPengamat, float *sudutElevasi, float *jarakPengamat) {
     printf("=======================================================\n");
-    printf("         MENGHITUNG SOLUSI (Substitusi Balik)\n");
+    printf("              INPUT DATA PENGUKURAN\n");
     printf("=======================================================\n\n");
     
-    /* Mulai dari baris terakhir, naik ke atas */
-    for(baris = n-1; baris >= 0; baris--) {
-        
-        /* Ambil nilai konstanta dari kolom terakhir */
-        jumlah = mat[baris][n];
-        
-        printf("Menghitung x%d:\n", baris+1);
-        printf("  Mulai dari: %.2f\n", jumlah);
-        
-        /* Kurangi dengan hasil variabel yang sudah diketahui */
-        for(kolom = baris+1; kolom < n; kolom++) {
-            jumlah = jumlah - (mat[baris][kolom] * hasil[kolom]);
-            printf("  Kurangi: %.2f x %.2f = %.2f\n", 
-                   mat[baris][kolom], hasil[kolom], mat[baris][kolom] * hasil[kolom]);
-        }
-        
-        /* Bagi dengan koefisien diagonal */
-        hasil[baris] = jumlah / mat[baris][baris];
-        
-        printf("  Bagi dengan: %.2f\n", mat[baris][baris]);
-        printf("  --> x%d = %.4f\n\n", baris+1, hasil[baris]);
-    }
+    /* Input tinggi pengamat */
+    printf("Masukkan tinggi badan pengamat (dalam meter): ");
+    scanf("%f", tinggiPengamat);
+    bersihkanBuffer();
     
-    tekanEnter();
+    /* Input sudut elevasi */
+    printf("Masukkan sudut elevasi (dalam derajat): ");
+    scanf("%f", sudutElevasi);
+    bersihkanBuffer();
+    
+    /* Input jarak pengamat ke gedung */
+    printf("Masukkan jarak pengamat ke gedung (dalam meter): ");
+    scanf("%f", jarakPengamat);
+    bersihkanBuffer();
+    
+    printf("\n");
 }
 
 /*
 ===============================================================================
-FUNGSI 5: TAMPILKAN HASIL AKHIR
+BAGIAN 5: FUNGSI VALIDASI INPUT
 ===============================================================================
-Fungsi ini menampilkan solusi akhir dengan format yang jelas
 */
 
-void tampilkanHasil(int n, float hasil[10]) {
-    int i;
+int validasiInput(float tinggiPengamat, float sudutElevasi, float jarakPengamat) {
+    int valid = 1;  /* Anggap input valid, 1 = true */
     
     printf("=======================================================\n");
-    printf("                  HASIL AKHIR\n");
+    printf("              VALIDASI INPUT DATA\n");
     printf("=======================================================\n\n");
     
-    printf("  Solusi dari sistem persamaan linear:\n\n");
-    
-    for(i = 0; i < n; i++) {
-        printf("      x%d  =  %.4f\n", i+1, hasil[i]);
+    /* Cek tinggi pengamat (harus positif dan wajar) */
+    if(tinggiPengamat <= 0 || tinggiPengamat > 3) {
+        printf("ERROR: Tinggi pengamat tidak valid!\n");
+        printf("       Harus antara 0 - 3 meter.\n\n");
+        valid = 0;
     }
     
+    /* Cek sudut elevasi (harus antara 0 - 90 derajat) */
+    if(sudutElevasi <= 0 || sudutElevasi >= 90) {
+        printf("ERROR: Sudut elevasi tidak valid!\n");
+        printf("       Harus antara 0 - 90 derajat.\n\n");
+        valid = 0;
+    }
+    
+    /* Cek jarak pengamat (harus positif) */
+    if(jarakPengamat <= 0) {
+        printf("ERROR: Jarak pengamat tidak valid!\n");
+        printf("       Harus lebih dari 0 meter.\n\n");
+        valid = 0;
+    }
+    
+    if(valid) {
+        printf("✓ Semua input VALID!\n\n");
+    }
+    
+    printf("=======================================================\n\n");
+    
+    return valid;  /* Return 1 jika valid, 0 jika tidak valid */
+}
+
+/*
+===============================================================================
+BAGIAN 6: FUNGSI TAMPILKAN DATA INPUT
+===============================================================================
+*/
+
+void tampilkanDataInput(float tinggiPengamat, float sudutElevasi, float jarakPengamat) {
+    printf("=======================================================\n");
+    printf("              DATA PENGUKURAN\n");
+    printf("=======================================================\n\n");
+    printf("  Tinggi Badan Pengamat  : %.2f meter\n", tinggiPengamat);
+    printf("  Sudut Elevasi          : %.2f derajat\n", sudutElevasi);
+    printf("  Jarak ke Gedung        : %.2f meter\n", jarakPengamat);
     printf("\n=======================================================\n\n");
 }
 
 /*
 ===============================================================================
-PROGRAM UTAMA (MAIN)
+BAGIAN 7: FUNGSI PERHITUNGAN TINGGI GEDUNG
+===============================================================================
+*/
+
+float hitungTinggiGedung(float tinggiPengamat, float sudutElevasi, float jarakPengamat) {
+    float sudutRadian;      /* Sudut dalam satuan radian */
+    float tinggiTambahan;   /* Tinggi dari mata pengamat ke puncak gedung */
+    float tinggiTotal;      /* Tinggi total gedung */
+    
+    printf("=======================================================\n");
+    printf("          PROSES PERHITUNGAN TRIGONOMETRI\n");
+    printf("=======================================================\n\n");
+    
+    /* Langkah 1: Konversi sudut dari derajat ke radian */
+    sudutRadian = derajatKeRadian(sudutElevasi);
+    printf("Langkah 1: Konversi sudut ke radian\n");
+    printf("  Sudut (radian) = %.2f × (π/180)\n", sudutElevasi);
+    printf("  Sudut (radian) = %.6f radian\n\n", sudutRadian);
+    
+    /* Langkah 2: Hitung tinggi tambahan menggunakan tan */
+    /* Rumus: tinggi tambahan = jarak × tan(sudut) */
+    tinggiTambahan = jarakPengamat * tan(sudutRadian);
+    printf("Langkah 2: Hitung tinggi dari mata ke puncak gedung\n");
+    printf("  Tinggi tambahan = Jarak × tan(sudut)\n");
+    printf("  Tinggi tambahan = %.2f × tan(%.6f)\n", jarakPengamat, sudutRadian);
+    printf("  Tinggi tambahan = %.2f × %.6f\n", jarakPengamat, tan(sudutRadian));
+    printf("  Tinggi tambahan = %.2f meter\n\n", tinggiTambahan);
+    
+    /* Langkah 3: Hitung tinggi total gedung */
+    /* Rumus: tinggi total = tinggi pengamat + tinggi tambahan */
+    tinggiTotal = tinggiPengamat + tinggiTambahan;
+    printf("Langkah 3: Hitung tinggi total gedung\n");
+    printf("  Tinggi Total = Tinggi Pengamat + Tinggi Tambahan\n");
+    printf("  Tinggi Total = %.2f + %.2f\n", tinggiPengamat, tinggiTambahan);
+    printf("  Tinggi Total = %.2f meter\n\n", tinggiTotal);
+    
+    printf("=======================================================\n\n");
+    
+    return tinggiTotal;
+}
+
+/*
+===============================================================================
+BAGIAN 8: FUNGSI TAMPILKAN HASIL
+===============================================================================
+*/
+
+void tampilkanHasil(float tinggiGedung) {
+    printf("=======================================================\n");
+    printf("=======================================================\n");
+    printf("                                                       \n");
+    printf("              HASIL PENGUKURAN                         \n");
+    printf("                                                       \n");
+    printf("=======================================================\n");
+    printf("=======================================================\n\n");
+    printf("   TINGGI GEDUNG = %.2f METER\n\n", tinggiGedung);
+    
+    /* Konversi ke satuan lain untuk informasi tambahan */
+    printf("   Konversi ke satuan lain:\n");
+    printf("   - Centimeter (cm)  : %.2f cm\n", tinggiGedung * 100);
+    printf("   - Kilometer (km)   : %.6f km\n", tinggiGedung / 1000);
+    printf("\n");
+    printf("=======================================================\n\n");
+}
+
+/*
+===============================================================================
+BAGIAN 9: FUNGSI TANYA ULANG
+===============================================================================
+*/
+
+int tanyaUlang() {
+    char pilihan;
+    
+    printf("Apakah Anda ingin mengukur gedung lain? (y/n): ");
+    scanf("%c", &pilihan);
+    bersihkanBuffer();
+    
+    /* Return 1 jika user pilih 'y' atau 'Y', 0 jika tidak */
+    if(pilihan == 'y' || pilihan == 'Y') {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/*
+===============================================================================
+BAGIAN 10: PROGRAM UTAMA (MAIN)
 ===============================================================================
 */
 
 int main() {
     /* Deklarasi variabel */
-    int jumlahPersamaan;
-    float matriks[10][11];  /* Matriks augmented maksimal 10x11 */
-    float solusi[10];       /* Array untuk menyimpan hasil x1, x2, x3, ... */
+    float tinggiPengamat;   /* Tinggi badan pengamat dalam meter */
+    float sudutElevasi;     /* Sudut elevasi dalam derajat */
+    float jarakPengamat;    /* Jarak horizontal pengamat ke gedung dalam meter */
+    float tinggiGedung;     /* Hasil perhitungan tinggi gedung */
+    int ulangi;             /* Flag untuk mengulang program */
+    
+    /* Loop utama program - bisa dijalankan berulang kali */
+    do {
+        /*
+        ===================================================================
+        LANGKAH 1: TAMPILKAN HEADER PROGRAM
+        ===================================================================
+        */
+        tampilkanHeader();
+        tekanEnter();
+        
+        /*
+        ===================================================================
+        LANGKAH 2: TAMPILKAN ILUSTRASI PENGUKURAN
+        ===================================================================
+        */
+        tampilkanIlustrasi();
+        tekanEnter();
+        
+        /*
+        ===================================================================
+        LANGKAH 3: INPUT DATA PENGUKURAN
+        ===================================================================
+        */
+        inputDataPengukuran(&tinggiPengamat, &sudutElevasi, &jarakPengamat);
+        
+        /*
+        ===================================================================
+        LANGKAH 4: VALIDASI INPUT
+        ===================================================================
+        */
+        if(!validasiInput(tinggiPengamat, sudutElevasi, jarakPengamat)) {
+            /* Jika input tidak valid, tampilkan pesan dan keluar */
+            printf("Program dihentikan karena input tidak valid.\n");
+            printf("Silakan jalankan program kembali.\n\n");
+            return 1;  /* Keluar dengan kode error */
+        }
+        
+        tekanEnter();
+        
+        /*
+        ===================================================================
+        LANGKAH 5: TAMPILKAN DATA INPUT
+        ===================================================================
+        */
+        tampilkanDataInput(tinggiPengamat, sudutElevasi, jarakPengamat);
+        tekanEnter();
+        
+        /*
+        ===================================================================
+        LANGKAH 6: HITUNG TINGGI GEDUNG
+        ===================================================================
+        */
+        tinggiGedung = hitungTinggiGedung(tinggiPengamat, sudutElevasi, jarakPengamat);
+        tekanEnter();
+        
+        /*
+        ===================================================================
+        LANGKAH 7: TAMPILKAN HASIL
+        ===================================================================
+        */
+        tampilkanHasil(tinggiGedung);
+        
+        /*
+        ===================================================================
+        LANGKAH 8: TANYA APAKAH INGIN MENGULANG
+        ===================================================================
+        */
+        ulangi = tanyaUlang();
+        printf("\n");
+        
+    } while(ulangi);  /* Ulangi selama user memilih 'y' */
     
     /*
-    ========================================================================
-    LANGKAH 1: TAMPILKAN JUDUL PROGRAM
-    ========================================================================
-    */
-    
-    printf("\n");
-    printf("=======================================================\n");
-    printf("=======================================================\n");
-    printf("                                                       \n");
-    printf("        PROGRAM ELIMINASI GAUSS                        \n");
-    printf("        Penyelesaian Sistem Persamaan Linear          \n");
-    printf("                                                       \n");
-    printf("=======================================================\n");
-    printf("=======================================================\n");
-    printf("\n");
-    
-    /*
-    ========================================================================
-    LANGKAH 2: INPUT JUMLAH PERSAMAAN
-    ========================================================================
-    */
-    
-    printf("Berapa jumlah persamaan yang ingin diselesaikan?\n");
-    printf("(Minimal 1, Maksimal 10)\n\n");
-    printf("Jumlah persamaan: ");
-    scanf("%d", &jumlahPersamaan);
-    bersihkanBuffer();
-    
-    /* Validasi input */
-    if(jumlahPersamaan < 1 || jumlahPersamaan > 10) {
-        printf("\nERROR: Jumlah persamaan harus antara 1-10!\n");
-        printf("Program dihentikan.\n\n");
-        return 1;
-    }
-    
-    tekanEnter();
-    
-    /*
-    ========================================================================
-    LANGKAH 3: INPUT MATRIKS AUGMENTED
-    ========================================================================
-    */
-    
-    inputMatriks(jumlahPersamaan, matriks);
-    
-    /*
-    ========================================================================
-    LANGKAH 4: TAMPILKAN MATRIKS AWAL
-    ========================================================================
-    */
-    
-    tampilkanMatriks(jumlahPersamaan, matriks, "MATRIKS AWAL (Input Anda)");
-    tekanEnter();
-    
-    /*
-    ========================================================================
-    LANGKAH 5: PROSES ELIMINASI GAUSS
-    ========================================================================
-    */
-    
-    prosesEliminasi(jumlahPersamaan, matriks);
-    
-    /*
-    ========================================================================
-    LANGKAH 6: TAMPILKAN MATRIKS SETELAH ELIMINASI
-    ========================================================================
-    */
-    
-    tampilkanMatriks(jumlahPersamaan, matriks, "MATRIKS SETELAH ELIMINASI");
-    tekanEnter();
-    
-    /*
-    ========================================================================
-    LANGKAH 7: HITUNG SOLUSI DENGAN SUBSTITUSI BALIK
-    ========================================================================
-    */
-    
-    hitungSolusi(jumlahPersamaan, matriks, solusi);
-    
-    /*
-    ========================================================================
-    LANGKAH 8: TAMPILKAN HASIL AKHIR
-    ========================================================================
-    */
-    
-    tampilkanHasil(jumlahPersamaan, solusi);
-    
-    /*
-    ========================================================================
+    ===================================================================
     PROGRAM SELESAI
-    ========================================================================
+    ===================================================================
     */
+    printf("=======================================================\n");
+    printf("  Terima kasih telah menggunakan program ini!\n");
+    printf("=======================================================\n\n");
     
-    printf("Terima kasih telah menggunakan program ini!\n");
-    printf("Tekan ENTER untuk keluar...");
-    getchar();
-    
-    return 0;
+    return 0;  /* Program selesai dengan sukses */
 }
 
 /*
 ===============================================================================
-                        CARA MENGGUNAKAN PROGRAM
+                     CARA MENGGUNAKAN PROGRAM
 ===============================================================================
 
 1. COMPILE PROGRAM
    Di terminal VS Code, ketik:
-   gcc gauss.c -o gauss
+   gcc tinggi_gedung.c -o tinggi_gedung -lm
    
+   CATATAN: Flag -lm diperlukan untuk link library matematika (math.h)
+
 2. JALANKAN PROGRAM
-   Windows: gauss.exe
-   Linux/Mac: ./gauss
+   Windows: tinggi_gedung.exe
+   Linux/Mac: ./tinggi_gedung
 
 3. CONTOH INPUT
 
-   Misalkan Anda ingin menyelesaikan sistem persamaan:
-   
-   2x + 1y - 1z = 8
-   -3x - 1y + 2z = -11
-   -2x + 1y + 2z = -3
-   
-   Cara input:
-   
-   Jumlah persamaan: 3 [ENTER]
-   
-   Baris ke-1: 2 1 -1 8 [ENTER]
-   Baris ke-2: -3 -1 2 -11 [ENTER]
-   Baris ke-3: -2 1 2 -3 [ENTER]
-   
-   [Tekan ENTER beberapa kali untuk melihat proses]
-   
+   Tinggi badan pengamat: 1.7 [ENTER]
+   Sudut elevasi: 45 [ENTER]
+   Jarak ke gedung: 50 [ENTER]
+
 4. OUTPUT YANG DIHARAPKAN
 
-   HASIL AKHIR
+   TINGGI GEDUNG = 51.70 METER
+
+===============================================================================
+                        PENJELASAN RUMUS
+===============================================================================
+
+Rumus dasar trigonometri yang digunakan:
+
+   tan(α) = tinggi tambahan / jarak
    
-   x1 = 2.0000
-   x2 = 3.0000
-   x3 = -1.0000
+Maka:
+   tinggi tambahan = jarak × tan(α)
+   
+Dan tinggi total gedung:
+   Tinggi Gedung = Tinggi Pengamat + tinggi tambahan
+
+Dimana:
+   - α (alpha) = sudut elevasi
+   - tan = fungsi tangen dalam trigonometri
+   - Tinggi Pengamat = tinggi mata pengamat dari tanah
+   - tinggi tambahan = tinggi dari mata pengamat ke puncak gedung
+
+===============================================================================
+                            CONTOH KASUS
+===============================================================================
+
+KASUS 1:
+  Input:
+    - Tinggi pengamat: 1.7 meter
+    - Sudut elevasi: 45 derajat
+    - Jarak: 50 meter
+  
+  Perhitungan:
+    - tan(45°) = 1.0
+    - Tinggi tambahan = 50 × 1.0 = 50 meter
+    - Tinggi gedung = 1.7 + 50 = 51.7 meter
+
+KASUS 2:
+  Input:
+    - Tinggi pengamat: 1.65 meter
+    - Sudut elevasi: 30 derajat
+    - Jarak: 100 meter
+  
+  Perhitungan:
+    - tan(30°) ≈ 0.5774
+    - Tinggi tambahan = 100 × 0.5774 = 57.74 meter
+    - Tinggi gedung = 1.65 + 57.74 = 59.39 meter
 
 ===============================================================================
                             TIPS PENTING
 ===============================================================================
 
-- Pisahkan angka dengan SPASI (bukan koma)
-- Gunakan TITIK untuk desimal (contoh: 3.5, bukan 3,5)
-- Untuk angka negatif, gunakan tanda MINUS di depan (contoh: -3)
-- Setiap baris harus diakhiri dengan ENTER
-- Program akan pause di beberapa tempat, tekan ENTER untuk lanjut
+1. Sudut elevasi harus dalam rentang 0 - 90 derajat
+2. Semakin besar sudut, semakin tinggi gedung (dengan jarak sama)
+3. Semakin jauh jarak, semakin tidak akurat pengukuran
+4. Pastikan pengukuran jarak dilakukan secara horizontal (datar)
+5. Tinggi pengamat diukur dari tanah ke mata (bukan ke kepala)
 
 ===============================================================================
 */
