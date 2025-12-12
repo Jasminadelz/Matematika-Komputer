@@ -1,0 +1,357 @@
+/*
+================================================================================
+PROGRAM HITUNG VOLUME DANAU
+================================================================================
+Program ini menghitung volume total danau menggunakan metode pembagian lapisan.
+Dibuat untuk mahasiswa pemula yang sedang belajar Bahasa C.
+
+Konsep:
+- Danau dibagi menjadi beberapa lapisan horizontal
+- Setiap lapisan dianggap sebagai silinder dengan tinggi = interval
+- Volume total = jumlah volume semua lapisan
+================================================================================
+*/
+
+// ============================================================================
+// BAGIAN 1: HEADER - Library yang dibutuhkan
+// ============================================================================
+#include <stdio.h>  // Library untuk input/output (printf, scanf)
+
+// ============================================================================
+// BAGIAN 2: DEKLARASI FUNGSI (Prototype)
+// ============================================================================
+// Fungsi untuk menghitung volume satu lapisan danau
+float hitungVolumeLapisan(float luasPermukaan, float tinggiLapisan);
+
+// Fungsi untuk menghitung volume total danau
+float hitungVolumeDanau(float luasAtas, float kedalamanMaks, float interval);
+
+// Fungsi untuk menampilkan header program
+void tampilkanHeader();
+
+// Fungsi untuk input data dari user
+void inputData(float *luasAtas, float *kedalaman, float *interval);
+
+// Fungsi untuk menampilkan hasil
+void tampilkanHasil(float volumeTotal, float luasAtas, float kedalaman, float interval);
+
+
+// ============================================================================
+// BAGIAN 3: FUNGSI MAIN - Program Utama
+// ============================================================================
+int main() {
+    // --- Deklarasi Variabel ---
+    float luasPermukaan;      // Luas permukaan lapisan paling atas (m²)
+    float kedalamanMaksimum;  // Kedalaman maksimum danau (m)
+    float intervalLapisan;    // Jarak antar lapisan (m)
+    float volumeTotal;        // Volume total danau (m³)
+    char pilihan;             // Variabel untuk menyimpan pilihan user (y/n)
+    
+    // Loop untuk mengulang program jika user memilih 'y'
+    do {
+        // --- Tampilkan Header Program ---
+        tampilkanHeader();
+        
+        // --- Input Data dari User ---
+        inputData(&luasPermukaan, &kedalamanMaksimum, &intervalLapisan);
+        
+        // --- Proses Perhitungan ---
+        volumeTotal = hitungVolumeDanau(luasPermukaan, kedalamanMaksimum, intervalLapisan);
+        
+        // --- Tampilkan Hasil ---
+        tampilkanHasil(volumeTotal, luasPermukaan, kedalamanMaksimum, intervalLapisan);
+        
+        // --- Tanya User Apakah Ingin Melanjutkan ---
+        printf("\nApakah Anda ingin menghitung volume danau lagi? (y/n): ");
+        scanf(" %c", &pilihan);  // Spasi sebelum %c untuk membersihkan buffer
+        printf("\n");
+        
+    } while (pilihan == 'y' || pilihan == 'Y');  // Loop berlanjut jika user input 'y' atau 'Y'
+    
+    // --- Pesan Penutup ---
+    printf("========================================================\n");
+    printf("     Terima kasih telah menggunakan program ini!\n");
+    printf("           Semoga bermanfaat untuk Anda :)\n");
+    printf("========================================================\n");
+    
+    return 0;  // Program selesai dengan sukses
+}
+
+
+// ============================================================================
+// BAGIAN 4: DEFINISI FUNGSI-FUNGSI (Body)
+// ============================================================================
+
+/*
+------------------------------------------------------------------------------
+Fungsi: tampilkanHeader
+Tujuan: Menampilkan judul dan informasi program
+Parameter: Tidak ada
+Return: Tidak ada (void)
+------------------------------------------------------------------------------
+*/
+void tampilkanHeader() {
+    printf("========================================================\n");
+    printf("        PROGRAM PERHITUNGAN VOLUME DANAU\n");
+    printf("========================================================\n");
+    printf("Program ini menghitung volume danau berdasarkan:\n");
+    printf("- Luas permukaan lapisan paling atas\n");
+    printf("- Kedalaman maksimum danau\n");
+    printf("- Interval jarak antar lapisan\n");
+    printf("========================================================\n\n");
+}
+
+
+/*
+------------------------------------------------------------------------------
+Fungsi: inputData
+Tujuan: Menerima input data dari user
+Parameter: 
+  - luasAtas: pointer untuk menyimpan luas permukaan (m²)
+  - kedalaman: pointer untuk menyimpan kedalaman maksimum (m)
+  - interval: pointer untuk menyimpan interval lapisan (m)
+Return: Tidak ada (void)
+Catatan: Menggunakan pointer agar nilai bisa diubah di fungsi main
+------------------------------------------------------------------------------
+*/
+void inputData(float *luasAtas, float *kedalaman, float *interval) {
+    printf("Masukkan data danau:\n");
+    printf("---------------------\n");
+    
+    // Input luas permukaan
+    printf("Luas permukaan lapisan paling atas (m2): ");
+    scanf("%f", luasAtas);
+    
+    // Input kedalaman maksimum
+    printf("Kedalaman maksimum danau (m): ");
+    scanf("%f", kedalaman);
+    
+    // Input interval lapisan
+    printf("Interval jarak antar lapisan (m): ");
+    scanf("%f", interval);
+    
+    printf("\n");
+}
+
+
+/*
+------------------------------------------------------------------------------
+Fungsi: hitungVolumeLapisan
+Tujuan: Menghitung volume satu lapisan danau
+Parameter:
+  - luasPermukaan: luas permukaan lapisan (m²)
+  - tinggiLapisan: tinggi/tebal lapisan (m)
+Return: Volume lapisan (m³)
+Rumus: Volume = Luas × Tinggi
+------------------------------------------------------------------------------
+*/
+float hitungVolumeLapisan(float luasPermukaan, float tinggiLapisan) {
+    float volume;
+    
+    // Rumus volume silinder: V = Luas × Tinggi
+    volume = luasPermukaan * tinggiLapisan;
+    
+    return volume;
+}
+
+
+/*
+------------------------------------------------------------------------------
+Fungsi: hitungVolumeDanau
+Tujuan: Menghitung volume total danau dari semua lapisan
+Parameter:
+  - luasAtas: luas permukaan lapisan paling atas (m²)
+  - kedalamanMaks: kedalaman maksimum danau (m)
+  - interval: jarak antar lapisan (m)
+Return: Volume total danau (m³)
+Metode: Menjumlahkan volume setiap lapisan dari atas ke bawah
+------------------------------------------------------------------------------
+*/
+float hitungVolumeDanau(float luasAtas, float kedalamanMaks, float interval) {
+    float volumeTotal = 0;        // Inisialisasi volume total = 0
+    float kedalamanSekarang = 0;  // Kedalaman saat ini dimulai dari 0
+    int nomorLapisan = 1;         // Counter nomor lapisan
+    
+    printf("Proses Perhitungan:\n");
+    printf("-------------------\n");
+    
+    // Loop untuk menghitung volume setiap lapisan
+    // Loop akan berjalan selama kedalaman sekarang < kedalaman maksimum
+    while (kedalamanSekarang < kedalamanMaks) {
+        float volumeLapisan;  // Volume untuk satu lapisan
+        
+        // Hitung volume lapisan ini
+        volumeLapisan = hitungVolumeLapisan(luasAtas, interval);
+        
+        // Tambahkan ke volume total
+        volumeTotal = volumeTotal + volumeLapisan;
+        
+        // Tampilkan informasi perhitungan lapisan ini
+        printf("Lapisan %d (kedalaman %.2f m): Volume = %.2f m3\n", 
+               nomorLapisan, kedalamanSekarang, volumeLapisan);
+        
+        // Update kedalaman untuk lapisan berikutnya
+        kedalamanSekarang = kedalamanSekarang + interval;
+        
+        // Increment nomor lapisan
+        nomorLapisan++;
+    }
+    
+    printf("-------------------\n\n");
+    
+    return volumeTotal;  // Kembalikan volume total
+}
+
+
+/*
+------------------------------------------------------------------------------
+Fungsi: tampilkanHasil
+Tujuan: Menampilkan hasil perhitungan volume danau
+Parameter:
+  - volumeTotal: volume total danau yang telah dihitung (m³)
+  - luasAtas: luas permukaan (m²)
+  - kedalaman: kedalaman maksimum (m)
+  - interval: interval lapisan (m)
+Return: Tidak ada (void)
+------------------------------------------------------------------------------
+*/
+void tampilkanHasil(float volumeTotal, float luasAtas, float kedalaman, float interval) {
+    int jumlahLapisan;  // Variabel untuk menyimpan jumlah lapisan
+    
+    // Hitung jumlah lapisan total
+    jumlahLapisan = (int)(kedalaman / interval);
+    
+    printf("========================================================\n");
+    printf("                  HASIL PERHITUNGAN\n");
+    printf("========================================================\n");
+    printf("Data Input:\n");
+    printf("  - Luas permukaan      : %.2f m2\n", luasAtas);
+    printf("  - Kedalaman maksimum  : %.2f m\n", kedalaman);
+    printf("  - Interval lapisan    : %.2f m\n", interval);
+    printf("  - Jumlah lapisan      : %d lapisan\n", jumlahLapisan);
+    printf("\n");
+    printf("Hasil:\n");
+    printf("  >>> VOLUME TOTAL DANAU = %.2f m3 <<<\n", volumeTotal);
+    printf("========================================================\n");
+}
+
+
+/*
+================================================================================
+CARA MENGERJAKAN DI TERMINAL
+
+1. MENYIMPAN FILE
+   - Buka text editor (nano, vim, atau gedit)
+   - Copy paste kode program ini
+   - Simpan dengan nama: volume_danau.c
+
+2. COMPILE PROGRAM
+   Buka terminal, lalu ketik:
+   
+   gcc volume_danau.c -o volume_danau
+   
+   Penjelasan:
+   - gcc        : compiler bahasa C
+   - volume_danau.c : nama file source code
+   - -o         : option untuk menentukan nama output
+   - volume_danau   : nama file executable hasil compile
+
+3. MENJALANKAN PROGRAM
+   Setelah compile berhasil, jalankan dengan:
+   
+   ./volume_danau
+   
+   Tanda ./ artinya menjalankan file di direktori saat ini
+
+4. CONTOH INPUT/OUTPUT
+   
+   Input:
+   - Luas permukaan lapisan paling atas (m2): 1000
+   - Kedalaman maksimum danau (m): 20
+   - Interval jarak antar lapisan (m): 5
+   
+   Output:
+   - Program akan menampilkan perhitungan setiap lapisan
+   - Volume total danau akan ditampilkan di akhir
+
+5. JIKA ADA ERROR SAAT COMPILE
+   - Pastikan gcc sudah terinstall (cek: gcc --version)
+   - Periksa syntax error (biasanya ada pesan error dari compiler)
+   - Pastikan nama file benar
+
+
+================================================================================
+PENJELASAN CARA KERJA PROGRAM
+
+ALUR PROGRAM:
+1. Program dimulai dari fungsi main()
+2. Fungsi tampilkanHeader() dipanggil untuk menampilkan judul
+3. Fungsi inputData() dipanggil untuk meminta data dari user
+4. Fungsi hitungVolumeDanau() dipanggil untuk menghitung volume
+   - Di dalam fungsi ini, ada loop yang menghitung setiap lapisan
+   - Setiap lapisan dihitung dengan fungsi hitungVolumeLapisan()
+   - Volume setiap lapisan dijumlahkan menjadi volume total
+5. Fungsi tampilkanHasil() dipanggil untuk menampilkan hasil akhir
+
+LOGIKA PERHITUNGAN:
+- Danau dibayangkan seperti tumpukan pancake (lapisan-lapisan datar)
+- Setiap lapisan adalah silinder dengan tinggi = interval
+- Mulai dari permukaan (kedalaman 0) sampai dasar danau
+- Loop while akan terus berjalan selama kedalaman < kedalaman maksimum
+- Setiap iterasi:
+  * Hitung volume 1 lapisan
+  * Tambahkan ke volume total
+  * Pindah ke lapisan berikutnya (tambah kedalaman dengan interval)
+
+
+================================================================================
+PENJELASAN RUMUS YANG DIGUNAKAN
+
+RUMUS DASAR:
+Volume silinder = Luas alas × Tinggi
+
+PENERAPAN DALAM PROGRAM:
+1. Volume 1 Lapisan:
+   V_lapisan = Luas_permukaan × Interval
+   
+   Contoh:
+   - Luas permukaan = 1000 m²
+   - Interval = 5 m
+   - V_lapisan = 1000 × 5 = 5000 m³
+
+2. Volume Total Danau:
+   V_total = V_lapisan1 + V_lapisan2 + V_lapisan3 + ... + V_lapisanN
+   V_total = Σ (Luas × Interval) untuk semua lapisan
+   
+   Atau dalam bentuk matematika:
+   V_total = Luas × Interval × Jumlah_lapisan
+   V_total = Luas × Interval × (Kedalaman / Interval)
+   V_total = Luas × Kedalaman
+
+CONTOH PERHITUNGAN LENGKAP:
+Data:
+- Luas permukaan = 1000 m²
+- Kedalaman maksimum = 20 m
+- Interval = 5 m
+
+Perhitungan:
+- Jumlah lapisan = 20 / 5 = 4 lapisan
+
+Lapisan 1 (kedalaman 0-5 m):   V = 1000 × 5 = 5000 m³
+Lapisan 2 (kedalaman 5-10 m):  V = 1000 × 5 = 5000 m³
+Lapisan 3 (kedalaman 10-15 m): V = 1000 × 5 = 5000 m³
+Lapisan 4 (kedalaman 15-20 m): V = 1000 × 5 = 5000 m³
+                                    ---------------
+Volume Total:                       20000 m³
+
+ASUMSI PROGRAM:
+- Luas permukaan setiap lapisan dianggap sama (konstan)
+- Bentuk danau dianggap seperti silinder vertikal
+- Interval pembagian lapisan merata
+
+CATATAN:
+Dalam kenyataan, danau biasanya menyempit ke bawah (seperti kerucut).
+Program ini adalah model sederhana untuk pembelajaran.
+
+================================================================================
+*/
